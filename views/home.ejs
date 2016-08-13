@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project HONG - Contract Explorer</title>
+
+
+<% include template/header_script.ejs %>
+
+<style>
+.site_title{text-align: center;}
+select{display: block}
+.testnet_notice{color:#ff0000;}
+</style>
+</head>
+
+<body>
+
+
+<div class="container">
+    <h4 class="site_title">HONG Contract Explorer <span class="testnet_notice">[TESTNET]</span></h4>
+
+    <div>Select a contract to continue</div>
+    <div class="row">
+        <div class="col m9 s12">
+            <form method="GET" action="/contract/" id="contract_select">
+            <select name="contract">
+            <% if(typeof data != "undefined"){
+                if(data.length){
+                    for(var i = 0;i < data.length;i++) { %>
+                        <option value="<%=data[i].address%>"><%=data[i].nickname%> (<%=data[i].address%>)</option>
+
+                    <% }
+
+                }else{ %>
+                    <option disabled>No option available</option>
+                <% }
+            }else{
+            %>
+                <option disabled>No connection</option>
+            <% } %>
+
+            </select>
+            </form>
+        </div>
+        <div class="col m3 s12">
+            <a class="waves-effect waves-light btn submit_button">Continue</a>
+        </div>
+    </div>
+    <div>Cannot see the contract? <a href="./contract/watch">Add one here</a>.</div>
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(".submit_button").click(function(){
+        $("form#contract_select").submit();
+    });
+
+</script>
+
+<% include template/footer.ejs %>
+
