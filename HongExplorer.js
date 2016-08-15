@@ -126,16 +126,23 @@ app.get('/c/:contract', function(req, res){
 
         console.log("balance_wei = " + balance_wei);
 
-        for(var a in hong){
-            console.log(a);
-        }
+        var str = ""
+        // for(var a in hong){
+        //     // console.log(a);
+        //     str += (a + ", ");
+        // }
+        // console.log(str);
 
-        console.log("hong.isFundLocked() = " + hong.isFundLocked());
-        console.log("hong.getCurrentTier() = " + hong.getCurrentTier());
-        console.log("hong.tokensPerTier() = " + hong.tokensPerTier());
+
+        // var k = hong.balanceOf();
+        // console.log("k = " + k);
+        // var k2 = hong.balanceOf("0x575D25692f11dAAedfd4b1427C438Cc1687d54Cb");
+        // console.log("k2 = " + k2);
+
+
 
         var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
-        var storageObject = web3.eth.getStorageAt(contract_address);
+        // var storageObject = web3.eth.getStorageAt(contract_address);
 
         // render HTML
         res.render('contract_home2', {
@@ -155,6 +162,9 @@ app.get('/c/:contract', function(req, res){
                 actualBalance: hong.actualBalance(),
 
                 tokensCreated: hong.tokensCreated(),
+                bountyTokensCreated: hong.bountyTokensCreated(),
+                totalTokensCreated: hong.tokensCreated().toNumber() + hong.bountyTokensCreated().toNumber(),
+
                 managementBodyAddress: hong.managementBodyAddress(),
                 closingTime: hong.closingTime(),
                 minTokensToCreate: hong.minTokensToCreate(),
@@ -168,7 +178,6 @@ app.get('/c/:contract', function(req, res){
 
                 isDayThirtyChecked: hong.isDayThirtyChecked(),
                 isDaySixtyChecked: hong.isDaySixtyChecked(),
-                bountyTokensCreated: hong.bountyTokensCreated(),
                 currentFiscalYear: hong.currentFiscalYear(),
                 lastKickoffDate: hong.lastKickoffDate(),
                 isKickoffEnabled: hong.isKickoffEnabled(),
