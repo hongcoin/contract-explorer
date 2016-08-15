@@ -86,9 +86,7 @@ app.get('/contract/watch', function(req, res){
 
 app.get('/c/:contract', function(req, res){
     // redirect handler for contract form
-    contract = req.params.contract
-
-    var contract_address;
+    var contract_address = req.params.contract;
     var contract_abi;
     var contract_obj;
     var contract_instance;
@@ -96,7 +94,7 @@ app.get('/c/:contract', function(req, res){
     // select info of the contract from database
 
     var query = "SELECT * FROM `contract` WHERE `address` = ? ";
-    connection.query(query, [contract], function(err, rows){
+    connection.query(query, [contract_address], function(err, rows){
 
         if(err)
             console.log("Error Selecting : %s ",err );
@@ -110,8 +108,6 @@ app.get('/c/:contract', function(req, res){
         }
 
         var result = rows[0];
-
-        contract_address = result.address;
         contract_abi = result.abi_definition;
 
         // collect info of contract from web3 api
@@ -121,26 +117,47 @@ app.get('/c/:contract', function(req, res){
 
         // find contract info ...
 
+        // total balance
+        var balance_wei = web3.eth.getBalance(contract_address);
+        var transaction_count = web3.eth.getBlockTransactionCount(contract_address);
+
 
         // render HTML
         res.render('contract_home', {
             data: rows,
-            contract: contract
+            block_number: web3.eth.blockNumber,
+            contract: {
+                address: contract_address,
+                contract_balance: {
+                    wei: balance_wei,
+                    ether: web3.fromWei(balance_wei, "ether")
+                },
+                transaction_count: transaction_count
+            }
         });
         res.end();
     });
-
 });
+
 
 app.get('/server/status', function(req, res){
     console.log('GET /server/status')
 
-    result = web3.eth.getBlock("0");
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    try{
+        result = web3.eth.getBlock("0");
 
+    }catch(err){
+        console.log(err.message);
+        console.log('Geth is OFFLINE');
+        res.end(JSON.stringify({"status": "failed", "message": "GETH_OFFLINE"}));
+        return;
+    }
+
+    // Block 0 in testnet has a difficulty of "131072"
     var is_testnet = (result.difficulty == "131072");
 
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({"is_testnet": is_testnet}));
+    res.end(JSON.stringify({"status": "success", "is_testnet": is_testnet}));
 });
 
 
