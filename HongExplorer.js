@@ -99,12 +99,14 @@ app.get('/c/:contract', function(req, res){
         if(err)
             console.log("Error Selecting : %s ",err );
 
+        console.log(rows.length);
         if(rows.length == 0){
             res.writeHead(404, {});
-            res.write('<html><head></head><body>');
+            res.write('<html><head><title>Contract not found</title></head><body>');
             res.write("Contract " + contract_address + " does not exist.");
             res.write('</body></html>');
             res.end();
+            return;
         }
 
         var result = rows[0];
@@ -113,17 +115,29 @@ app.get('/c/:contract', function(req, res){
         // collect info of contract from web3 api
 
         contract_obj = web3.eth.contract(JSON.parse(contract_abi));
-        contract_instance = contract_obj.at(contract_address);
+        hong = contract_obj.at(contract_address);
 
         // find contract info ...
 
         // total balance
         var balance_wei = web3.eth.getBalance(contract_address);
-        var transaction_count = web3.eth.getBlockTransactionCount(contract_address);
+        // var transaction_count = web3.eth.getBlockTransactionCount(contract_address);
 
+        console.log("balance_wei = " + balance_wei);
+
+        for(var a in hong){
+            console.log(a);
+        }
+
+        console.log("hong.isFundLocked() = " + hong.isFundLocked());
+        console.log("hong.getCurrentTier() = " + hong.getCurrentTier());
+        console.log("hong.tokensPerTier() = " + hong.tokensPerTier());
+
+        var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
+        var storageObject = web3.eth.getStorageAt(contract_address);
 
         // render HTML
-        res.render('contract_home', {
+        res.render('contract_home2', {
             data: rows,
             block_number: web3.eth.blockNumber,
             contract: {
@@ -132,10 +146,52 @@ app.get('/c/:contract', function(req, res){
                     wei: balance_wei,
                     ether: web3.fromWei(balance_wei, "ether")
                 },
-                transaction_count: transaction_count
+
+                currentTier: hong.getCurrentTier(),
+                tokensAvailableAtCurrentTier: hong.tokensAvailableAtCurrentTier(),
+                divisor: hong.divisor(),
+                extraBalanceAccountBalance: hong.extraBalanceAccountBalance(),
+                actualBalance: hong.actualBalance(),
+
+                tokensCreated: hong.tokensCreated(),
+                managementBodyAddress: hong.managementBodyAddress(),
+                closingTime: hong.closingTime(),
+                minTokensToCreate: hong.minTokensToCreate(),
+                maxTokensToCreate: hong.maxTokensToCreate(),
+                tokensPerTier: hong.tokensPerTier(),
+                weiPerInitialHONG: hong.weiPerInitialHONG(),
+                extraBalance: hong.extraBalance(),
+                taxPaid: hong.taxPaid(),
+                isFundLocked: hong.isFundLocked(),
+                isFundReleased: hong.isFundReleased(),
+
+                isDayThirtyChecked: hong.isDayThirtyChecked(),
+                isDaySixtyChecked: hong.isDaySixtyChecked(),
+                bountyTokensCreated: hong.bountyTokensCreated(),
+                currentFiscalYear: hong.currentFiscalYear(),
+                lastKickoffDate: hong.lastKickoffDate(),
+                isKickoffEnabled: hong.isKickoffEnabled(),
+                isInitialKickoffEnabled: hong.isInitialKickoffEnabled(),
+                isFreezeEnabled: hong.isFreezeEnabled(),
+                isHarvestEnabled: hong.isHarvestEnabled(),
+                isDistributionReady: hong.isDistributionReady(),
+                isDistributionInProgress: hong.isDistributionInProgress(),
+                ReturnAccount: hong.ReturnAccount(),
+                HONGRewardAccount: hong.HONGRewardAccount(),
+                ManagementFeePoolWallet: hong.ManagementFeePoolWallet(),
+                managementBodyAddress: hong.managementBodyAddress(),
+                votedFreeze: hong.votedFreeze(),
+                votedHarvest: hong.votedHarvest(),
+                returnCollected: hong.returnCollected(),
+                supportKickoffQuorum: hong.supportKickoffQuorum(),
+                supportFreezeQuorum: hong.supportFreezeQuorum(),
+                supportHarvestQuorum: hong.supportHarvestQuorum(),
+                totalInitialBalance: hong.totalInitialBalance(),
+                annualManagementFee: hong.annualManagementFee(),
+                totalRewardToken: hong.totalRewardToken()
             }
         });
-        res.end();
+
     });
 });
 
