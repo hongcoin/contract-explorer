@@ -102,7 +102,7 @@ app.get('/c/:contract', function(req, res){
         if(rows.length == 0){
             res.writeHead(404, {});
             res.write('<html><head></head><body>');
-            res.write("Contract " + contract + " does not exist.");
+            res.write("Contract " + contract_address + " does not exist.");
             res.write('</body></html>');
             res.end();
         }
