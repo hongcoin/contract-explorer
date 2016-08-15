@@ -29,11 +29,11 @@ var connection = mysql.createConnection({
 
 
 
-var createContractRecord = function(address, nickname, abiDefinition){
-    var query = "INSERT INTO `contract` (`address`, `nickname`, `abi_definition`, `creation_datetime` VALUES (?, ?, ?, now());";
+var createContractRecord = function(address, contract_name, nickname, abiDefinition){
+    var query = "INSERT INTO `contract` (`address`, `contract_name`, `nickname`, `abi_definition`, `creation_datetime` VALUES (?, ?, ?, ?, now());";
 
     connection.query(
-        query, [address, nickname, abiDefinition]
+        query, [address, contract_name, nickname, abiDefinition]
     , function(err, rows, fields) {
         if (err) throw err;
     });
@@ -87,12 +87,64 @@ app.get('/contract/watch', function(req, res){
 app.get('/c/:contract', function(req, res){
     // redirect handler for contract form
     contract = req.params.contract
-    console.log(contract);
-    res.write('<html><head></head><body>');
-    res.write(contract);
-    res.write('</body></html>');
-    res.end();
+
+    var contract_address;
+    var contract_abi;
+    var contract_obj;
+    var contract_instance;
+
+    // select info of the contract from database
+
+    var query = "SELECT * FROM `contract` WHERE `address` = ? ";
+    connection.query(query, [contract], function(err, rows){
+
+        if(err)
+            console.log("Error Selecting : %s ",err );
+
+        if(rows.length == 0){
+            res.writeHead(404, {});
+            res.write('<html><head></head><body>');
+            res.write("Contract " + contract + " does not exist.");
+            res.write('</body></html>');
+            res.end();
+        }
+
+        var result = rows[0];
+
+        contract_address = result.address;
+        contract_abi = result.abi_definition;
+
+        // collect info of contract from web3 api
+
+        contract_obj = web3.eth.contract(JSON.parse(contract_abi));
+        contract_instance = contract_obj.at(contract_address);
+
+        // find contract info ...
+
+
+        // render HTML
+        res.render('contract_home', {
+            data: rows,
+            contract: contract
+        });
+        res.end();
+    });
+
 });
+
+app.get('/server/status', function(req, res){
+    console.log('GET /server/status')
+
+    result = web3.eth.getBlock("0");
+
+    var is_testnet = (result.difficulty == "131072");
+
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({"is_testnet": is_testnet}));
+});
+
+
+
 
 app.post('/createContract', function(req, res){
     console.log('POST /createContract');
@@ -111,6 +163,13 @@ app.post('/createContract', function(req, res){
         return
     }
 
+    contract_name = req.body.contractName;
+    if(!contract_name){
+        res.writeHead(400, {'Content-Type': 'application/json'});
+        res.end(JSON.stringify({"status": "failed", "message": "MISSING_PARAMETER", "details": "contract_name"}));
+        return
+    }
+
     abiDefinition = req.body.abiDefinition;
     if(!abiDefinition){
         res.writeHead(400, {'Content-Type': 'application/json'});
@@ -118,7 +177,7 @@ app.post('/createContract', function(req, res){
         return
     }
 
-    createContractRecord(address, nickname, abiDefinition);
+    createContractRecord(address, contract_name, nickname, abiDefinition);
 
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({"status": "success", "message": ""}));
