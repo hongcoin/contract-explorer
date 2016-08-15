@@ -9,7 +9,7 @@
 <style>
 .site_title{text-align: center;}
 select{display: block}
-.testnet_notice{color:#ff0000;}
+.testnet_notice{display:none;color:#ff0000;}
 </style>
 </head>
 
@@ -55,10 +55,11 @@ select{display: block}
 
 <script type="text/javascript">
 
-    $(".submit_button").click(function(){
-        $(".contract_name").val($("select option:selected").data("name"));
-        $("form#contract_select").submit();
-    });
+$(".submit_button").click(function(){
+    $(".contract_name").val($("select option:selected").data("name"));
+    $("form#contract_select").submit();
+});
+
 
 </script>
 

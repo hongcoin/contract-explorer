@@ -129,18 +129,27 @@ app.get('/c/:contract', function(req, res){
         });
         res.end();
     });
-
 });
+
 
 app.get('/server/status', function(req, res){
     console.log('GET /server/status')
 
-    result = web3.eth.getBlock("0");
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    try{
+        result = web3.eth.getBlock("0");
 
+    }catch(err){
+        console.log(err.message);
+        console.log('Geth is OFFLINE');
+        res.end(JSON.stringify({"status": "failed", "message": "GETH_OFFLINE"}));
+        return;
+    }
+
+    // Block 0 in testnet has a difficulty of "131072"
     var is_testnet = (result.difficulty == "131072");
 
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({"is_testnet": is_testnet}));
+    res.end(JSON.stringify({"status": "success", "is_testnet": is_testnet}));
 });
 
 

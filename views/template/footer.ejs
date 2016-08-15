@@ -1,3 +1,19 @@
 
+
+<script type="text/javascript">
+$.ajax({
+    type: "GET",
+    url: "/server/status"
+}).done(function( data ) {
+    if(data.status == "success"){
+        if(data.is_testnet){
+            $(".testnet_notice").show();
+        }
+    }else{
+        $(".testnet_notice").show().html("[Server offline]");
+    }
+});
+</script>
+
 </body>
 </html>
