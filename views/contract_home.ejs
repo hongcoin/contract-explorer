@@ -25,6 +25,8 @@ select{display: block}
 
 .sub_item{border-left:2px solid #d1d1d1;color:#555;font-size: 0.9em;padding:0 10px;margin-left: 4px;}
 
+.tips_box{text-align: center;margin: 12px 0;}
+.tips_box_inner{background: #ddffdd; padding:6px 12px; border-radius: 4px;display: inline;margin:auto;}
 .section_header{padding:4px 6px;border-bottom:1px solid #ddd;font-size: 1.2em;}
 .metrics{}
 .metrics_inner{
@@ -49,69 +51,80 @@ select{display: block}
 <div class="container">
     <h4 class="site_title">HONG Contract Explorer <span class="testnet_notice">[TESTNET]</span></h4>
 
-    <div>Viewing contract: <%=contract.address%></div>
+    <div>Viewing contract: <%=contract.address%> [<a href="/">Switch contract</a>]</div>
     <div>Current block number: <%=block_number%> </div>
-    <div>Contract balance: <%=contract.contract_balance.ether%> Ether (<%=contract.contract_balance.wei%> Wei)</div>
 
     <div class="separator"></div>
 
 
-    <div>
-        <div class="row">
-            <div class="col l4 m12 block">
-                <div class="block_inner">
-                    <div class="block_title">Fund Status</div>
+    <div class="tips_box">
+        <div class="tips_box_inner">
+            Tips: Learn more about the money flux
+            <a href="https://github.com/hongcoin/DO/wiki/Money-flux-in-the-HONG-contract" target="_blank">here</a>.
+        </div>
+    </div>
 
-                    <% if(contract.isFundLocked){ %>
-                    <div class="block_summary">Fund is locked</div>
-                    <% }else{ %>
-                    <div class="block_summary">Fund is not locked</div>
-                    <% } %>
+    <div class="row">
+        <div class="col l4 s12 block">
+            <div class="block_inner">
+                <div class="block_title">Fund Status</div>
 
-                    <div>Current contract balance: <%=contract.contract_balance.ether%> Ether </div>
-                    <div>Total tokens created: <%=contract.totalTokensCreated%> </div>
-                    <div class="sub_item">bountyTokensCreated: <%=contract.bountyTokensCreated%></div>
-                    <div class="sub_item">tokensCreated: <%=contract.tokensCreated%></div>
+                <% if(contract.isFundLocked){ %>
+                <div class="block_summary">Fund is locked</div>
+                <% }else{ %>
+                <div class="block_summary">Fund is not locked</div>
+                <% } %>
 
-                    <div>Current Fiscal Year: <%=contract.currentFiscalYear%> </div>
+                <div>Current contract balance: <%=contract.contract_balance.ether%> Ether </div>
+                <div>Total tokens created: <%=contract.totalTokensCreated%> </div>
+                <div class="sub_item">bountyTokensCreated: <%=contract.bountyTokensCreated%></div>
+                <div class="sub_item">tokensCreated: <%=contract.tokensCreated%></div>
 
-                </div>
+                <div>Current Fiscal Year: <%=contract.currentFiscalYear%> </div>
+
             </div>
-            <div class="col l8 m12 block">
-                <div class="block_inner">
-                    <div class="block_title">Fund Accounts</div>
+        </div>
+        <div class="col l8 s12 block">
+            <div class="block_inner">
+                <div class="block_title">Fund Accounts</div>
 
-                    <div class="address_info">
-                        Main Account
-                        <span><%=contract.address%></span>
-                    </div>
-                    <div class="address_info">
-                        managementBodyAddress
-                        <span><%=contract.managementBodyAddress%></span>
-                    </div>
-                    <div class="address_info">
-                        ManagementFeePoolWallet
-                        <span><%=contract.ManagementFeePoolWallet%></span>
-                    </div>
-                    <div class="address_info">
-                        extraBalance
-                        <span><%=contract.extraBalance%></span>
-                    </div>
-                    <div class="address_info">
-                        HONGRewardAccount
-                        <span><%=contract.HONGRewardAccount%></span>
-                    </div>
-                    <div class="address_info">
-                        ReturnAccount
-                        <span><%=contract.ReturnAccount%></span>
-                    </div>
+                <div class="address_info">
+                    Main Account
+                    <span><%=contract.address%></span>
+                </div>
+                <div class="address_info">
+                    managementBodyAddress
+                    <span><%=contract.managementBodyAddress%></span>
+                </div>
+                <div class="address_info">
+                    ManagementFeePoolWallet
+                    <span><%=contract.ManagementFeePoolWallet%></span>
+                </div>
+                <div class="address_info">
+                    extraBalance
+                    <span><%=contract.extraBalance%></span>
+                </div>
+                <div class="address_info">
+                    HONGRewardAccount
+                    <span><%=contract.HONGRewardAccount%></span>
+                </div>
+                <div class="address_info">
+                    ReturnAccount
+                    <span><%=contract.ReturnAccount%></span>
                 </div>
             </div>
         </div>
-
     </div>
 
 
+
+
+    <div class="tips_box">
+        <div class="tips_box_inner">
+            Tips: Learn more about these variables
+            <a href="https://github.com/hongcoin/DO/wiki/About-the-Smart-Contract:-Understanding-the-variables" target="_blank">here</a>.
+        </div>
+    </div>
 
     <div class="section_header">
       ICO Statistics
@@ -136,19 +149,19 @@ select{display: block}
                 <span class="number_desc">Is fund locked</span>
             </div>
         </div>
-        <div class="col m6 s6 metrics">
+        <div class="col m8 s12 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.closingTime_formatted%></span>
-                <span class="number_desc">ICO closing time (<%=contract.closingTime%>)</span>
+                <span class="number_desc">ICO closing time (Day 30) (<%=contract.closingTime%>)</span>
             </div>
         </div>
-        <div class="col m3 s6 metrics">
+        <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isDayThirtyChecked%></span>
                 <span class="number_desc">isDayThirtyChecked</span>
             </div>
         </div>
-        <div class="col m3 s6 metrics">
+        <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isDaySixtyChecked%></span>
                 <span class="number_desc">isDaySixtyChecked</span>
@@ -252,13 +265,13 @@ select{display: block}
 
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.votedKickoff%></span>
+                <span class="number_highlight">// todo<%=contract.votedKickoff%></span>
                 <span class="number_desc">Voted kickoff for Year 1</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%></span>
+                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
                 <span class="number_desc">support kickoff quorum for Year 1</span>
             </div>
         </div>
@@ -271,13 +284,13 @@ select{display: block}
 
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.votedKickoff%></span>
+                <span class="number_highlight">// todo<%=contract.votedKickoff%></span>
                 <span class="number_desc">Voted kickoff for Year 2</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%></span>
+                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
                 <span class="number_desc">support kickoff quorum for Year 2</span>
             </div>
         </div>
@@ -290,13 +303,13 @@ select{display: block}
 
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.votedKickoff%></span>
+                <span class="number_highlight">// todo<%=contract.votedKickoff%></span>
                 <span class="number_desc">Voted kickoff for Year 3</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%></span>
+                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
                 <span class="number_desc">support kickoff quorum for Year 3</span>
             </div>
         </div>
@@ -315,7 +328,7 @@ select{display: block}
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportFreezeQuorum%></span>
+                <span class="number_highlight"><%=contract.supportFreezeQuorum%> / <%=contract.totalTokensCreated%></span>
                 <span class="number_desc">support Freeze quorum</span>
             </div>
         </div>
@@ -335,13 +348,13 @@ select{display: block}
     <div class="row">
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.votedKickoff%></span>
+                <span class="number_highlight">// todo<%=contract.votedKickoff%></span>
                 <span class="number_desc">Voted kickoff for Year 4</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%></span>
+                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
                 <span class="number_desc">support kickoff quorum for Year 4</span>
             </div>
         </div>
@@ -360,7 +373,7 @@ select{display: block}
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportHarvestQuorum%></span>
+                <span class="number_highlight"><%=contract.supportHarvestQuorum%> / <%=contract.totalTokensCreated%></span>
                 <span class="number_desc">support harvest quorum</span>
             </div>
         </div>
@@ -392,6 +405,7 @@ select{display: block}
 
 
 
+<!--
 
     <div class="separator"></div>
 
@@ -447,7 +461,7 @@ select{display: block}
     <div>annualManagementFee: <%=contract.annualManagementFee%> </div>
     <div>totalRewardToken: <%=contract.totalRewardToken%> </div>
 
-
+-->
 
 </div>
 
