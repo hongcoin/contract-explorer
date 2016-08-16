@@ -29,7 +29,9 @@ var pool = mysql.createPool({
 
 
 var createContractRecord = function(address, contract_name, nickname, abiDefinition){
-    var query = "INSERT INTO `contract` (`address`, `contract_name`, `nickname`, `abi_definition`, `creation_datetime` VALUES (?, ?, ?, ?, now());";
+    var query = "INSERT INTO `contract` (`address`, `contract_name`, `nickname`, `abi_definition`, `creation_datetime`) VALUES (?, ?, ?, ?, now());";
+    console.log(query);
+    console.log([address, contract_name, nickname, abiDefinition]);
 
     pool.query(
         query, [address, contract_name, nickname, abiDefinition]
@@ -121,6 +123,7 @@ app.get('/c/:contract', function(req, res){
         var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
 
         // render HTML
+        try {
         res.render('contract_home', {
             data: rows,
             block_number: web3.eth.blockNumber,
@@ -178,7 +181,13 @@ app.get('/c/:contract', function(req, res){
                 totalRewardToken: hong.totalRewardToken()
             }
         });
+    } catch (err) {}
 
+        res.write('<html><head><title>Contract not valid</title></head><body>');
+
+        res.write("The system cannot process data of contract " + contract_address + " yet. This may be caused by change of HONG structure, or the contract is missing some functions.<br/><br/><a href='/'>Explore a new contract</a>");
+        res.write('</body></html>');
+        res.end();
     });
 });
 
