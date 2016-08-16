@@ -19,7 +19,7 @@ body{
     text-align: center;
 }
 label{text-align: left;}
-.testnet_notice{color:#ff0000;}
+.testnet_notice{display:none;color:#ff0000;}
 
 textarea{width:100%;}
 textarea#source_code{
@@ -30,22 +30,19 @@ textarea#source_code{
 .pick_class_name,
 .abiDefinition{display: none;}
 
-.view_log{
-    position: fixed;z-index: 2;top:6px;right:6px;display: inline-block;vertical-align: top;
-    padding: 8px 16px; border: 1px solid #dadada; background-color: #f7f7fa;
-}
+
 </style>
 
 </head>
 <body>
 
-<a href="/logs" target="_blank"><div class="view_log">View Logs</div></a>
-
 <div class="row">
     <div class="col s12">
 
         <div>
-            <h4>Watch a HONG Contract <span class="testnet_notice">[TESTNET]</span></h4>
+            <h4>Add a HONG Contract <span class="testnet_notice">[TESTNET]</span></h4>
+
+            <div>Step 1: Compile source code;  Step 2: Add contract details</div>
         </div>
 
 
@@ -61,6 +58,15 @@ textarea#source_code{
         <div class="result_compile"></div>
 
         <div class="pick_class_name">
+            <div>
+                <h5>Contract nickname</h5>
+            </div>
+
+            <div class="input-field ">
+                <input placeholder="Contract nickname" id="contract_nickname" type="text" class="validate">
+                <label for="contract_nickname">Contract nickname</label>
+            </div>
+
             <div>
                 <h5>Fill in contract address</h5>
             </div>
@@ -104,16 +110,19 @@ $(".submit_button").click(function(){
 
     $.ajax({
         type: "POST",
-        url: "/updateContract",
+        url: "/createContract",
         data: {
+            "nickname": $("#contract_nickname").val(),
             "address": $("#contract_address").val(),
+            "contractName": $("#contract_name").val(),
             "abiDefinition": $("#abiDefinition").val()
         },
         dataType: "json"
     }).done(function( data ) {
         if(data.status == "success"){
             // updated
-            alert("The listener is updated successfully.");
+            alert("The contract info is saved successfully.");
+            location.href = "/c/" + $("#contract_address").val();
         }
     });
 });
@@ -183,6 +192,18 @@ $("#contract_select").on("change", function(){
 
 });
 
+$.ajax({
+    type: "GET",
+    url: "/server/status"
+}).done(function( data ) {
+    if(data.status == "success"){
+        if(data.is_testnet){
+            $(".testnet_notice").show();
+        }
+    }else{
+        $(".testnet_notice").show().html("[Server offline]");
+    }
+});
 </script>
 
 </body>
