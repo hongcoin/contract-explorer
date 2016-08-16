@@ -20,7 +20,7 @@ var myContractInstanceAddress;
 
 
 var mysql      = require('mysql');
-var connection = mysql.createConnection({
+var pool = mysql.createPool({
     host    : options.storageConfig.host,
     user    : options.storageConfig.user,
     password: options.storageConfig.password,
@@ -28,11 +28,10 @@ var connection = mysql.createConnection({
 });
 
 
-
 var createContractRecord = function(address, contract_name, nickname, abiDefinition){
     var query = "INSERT INTO `contract` (`address`, `contract_name`, `nickname`, `abi_definition`, `creation_datetime` VALUES (?, ?, ?, ?, now());";
 
-    connection.query(
+    pool.query(
         query, [address, contract_name, nickname, abiDefinition]
     , function(err, rows, fields) {
         if (err) throw err;
@@ -47,7 +46,7 @@ app.use(favicon(__dirname + '/public/images/favicon.ico'));
 app.get('/', function(req, res){
     console.log('GET /')
     var query = "SELECT * FROM `contract` ";
-    connection.query(query, function(err, rows){
+    pool.query(query, function(err, rows){
 
         if(err)
             console.log("Error Selecting : %s ",err );
@@ -94,12 +93,11 @@ app.get('/c/:contract', function(req, res){
     // select info of the contract from database
 
     var query = "SELECT * FROM `contract` WHERE `address` = ? ";
-    connection.query(query, [contract_address], function(err, rows){
+    pool.query(query, [contract_address], function(err, rows){
 
         if(err)
             console.log("Error Selecting : %s ",err );
 
-        console.log(rows.length);
         if(rows.length == 0){
             res.writeHead(404, {});
             res.write('<html><head><title>Contract not found</title></head><body>');
@@ -118,34 +116,12 @@ app.get('/c/:contract', function(req, res){
         contract_obj = web3.eth.contract(JSON.parse(contract_abi));
         hong = contract_obj.at(contract_address);
 
-        // find contract info ...
-
         // total balance
         var balance_wei = web3.eth.getBalance(contract_address);
-        // var transaction_count = web3.eth.getBlockTransactionCount(contract_address);
-
-        console.log("balance_wei = " + balance_wei);
-
-        var str = ""
-        // for(var a in hong){
-        //     // console.log(a);
-        //     str += (a + ", ");
-        // }
-        // console.log(str);
-
-
-        // var k = hong.balanceOf();
-        // console.log("k = " + k);
-        // var k2 = hong.balanceOf("0x575D25692f11dAAedfd4b1427C438Cc1687d54Cb");
-        // console.log("k2 = " + k2);
-
-
-
         var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
-        // var storageObject = web3.eth.getStorageAt(contract_address);
 
         // render HTML
-        res.render('contract_home2', {
+        res.render('contract_home', {
             data: rows,
             block_number: web3.eth.blockNumber,
             contract: {
@@ -167,6 +143,7 @@ app.get('/c/:contract', function(req, res){
 
                 managementBodyAddress: hong.managementBodyAddress(),
                 closingTime: hong.closingTime(),
+                closingTime_formatted: dateFormat(new Date(hong.closingTime() * 1000), "yyyy-mm-dd HH:MM:ss o"),
                 minTokensToCreate: hong.minTokensToCreate(),
                 maxTokensToCreate: hong.maxTokensToCreate(),
                 tokensPerTier: hong.tokensPerTier(),
