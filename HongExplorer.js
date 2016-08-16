@@ -226,7 +226,7 @@ app.post('/createContract', function(req, res){
     contract_name = req.body.contractName;
     if(!contract_name){
         res.writeHead(400, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({"status": "failed", "message": "MISSING_PARAMETER", "details": "contract_name"}));
+        res.end(JSON.stringify({"status": "failed", "message": "MISSING_PARAMETER", "details": "contractName"}));
         return
     }
 
