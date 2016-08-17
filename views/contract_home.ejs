@@ -23,7 +23,8 @@ select{display: block}
 .block_title{font-size: 1.5em;}
 .block_summary{font-weight: bold;}
 
-.sub_item{border-left:2px solid #d1d1d1;color:#555;font-size: 0.9em;padding:0 10px;margin-left: 4px;}
+.new_info_section{margin-top:8px;}
+.sub_item{border-left:2px solid #d1d1d1;color:#8b8b8b;font-size: 0.9em;padding:0 10px;margin-left: 4px;}
 
 .tips_box{text-align: center;margin: 12px 0;}
 .tips_box_inner{background: #ddffdd; padding:6px 12px; border-radius: 4px;display: inline;margin:auto;}
@@ -75,12 +76,18 @@ select{display: block}
                 <div class="block_summary">Fund is not locked</div>
                 <% } %>
 
-                <div>Current contract balance: <%=contract.contract_balance.ether%> Ether </div>
-                <div>Total tokens created: <%=contract.totalTokensCreated%> </div>
+                <div class="new_info_section">Total balance: <%=totalContractBalance%> Ether </div>
+                <div class="sub_item">main account: <%=contract.contractBalance.ether%> Ether </div>
+                <div class="sub_item">extraBalance: <%=contract.extraBalanceBalance.ether%> Ether </div>
+                <div class="sub_item">HONGRewardAccount: <%=contract.HONGRewardAccountBalance.ether%> Ether </div>
+                <div class="sub_item">ManagementFeePoolWallet: <%=contract.ManagementFeePoolWalletBalance.ether%> Ether </div>
+                <div class="sub_item">returnAccount: <%=contract.returnAccountBalance.ether%> Ether </div>
+
+                <div class="new_info_section">Total tokens created: <%=contract.totalTokensCreated%> </div>
                 <div class="sub_item">bountyTokensCreated: <%=contract.bountyTokensCreated%></div>
                 <div class="sub_item">tokensCreated: <%=contract.tokensCreated%></div>
 
-                <div>Current Fiscal Year: <%=contract.currentFiscalYear%> </div>
+                <div class="new_info_section">Current Fiscal Year: <%=contract.currentFiscalYear%> </div>
 
             </div>
         </div>
@@ -89,27 +96,27 @@ select{display: block}
                 <div class="block_title">Fund Accounts</div>
 
                 <div class="address_info">
-                    Main Account
+                    Main Account (<%=contract.contractBalance.ether %> Ether)
                     <span><%=contract.address%></span>
                 </div>
                 <div class="address_info">
-                    managementBodyAddress
+                    managementBodyAddress (<%=contract.managementBodyAddressBalance.ether %> Ether)
                     <span><%=contract.managementBodyAddress%></span>
                 </div>
                 <div class="address_info">
-                    ManagementFeePoolWallet
+                    ManagementFeePoolWallet (<%=contract.ManagementFeePoolWalletBalance.ether %> Ether)
                     <span><%=contract.ManagementFeePoolWallet%></span>
                 </div>
                 <div class="address_info">
-                    extraBalance
+                    extraBalance (<%=contract.extraBalanceBalance.ether %> Ether)
                     <span><%=contract.extraBalance%></span>
                 </div>
                 <div class="address_info">
-                    HONGRewardAccount
+                    HONGRewardAccount (<%=contract.HONGRewardAccountBalance.ether %> Ether)
                     <span><%=contract.HONGRewardAccount%></span>
                 </div>
                 <div class="address_info">
-                    ReturnAccount
+                    ReturnAccount (<%=contract.returnAccountBalance.ether %> Ether)
                     <span><%=contract.ReturnAccount%></span>
                 </div>
             </div>
@@ -210,7 +217,7 @@ select{display: block}
                 <span class="number_desc">tokensAvailableAtCurrentTier</span>
             </div>
         </div>
-        <div class="col m3 s6 metrics">
+        <div class="col m9 s12 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.extraBalanceAccountBalance%></span>
                 <span class="number_desc">extraBalanceAccountBalance</span>
@@ -218,37 +225,17 @@ select{display: block}
         </div>
         <div class="col m3 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.taxPaid%></span>
+                <span class="number_highlight">// todo (<%=contract.taxPaid%>)</span>
                 <span class="number_desc">taxPaid</span>
             </div>
         </div>
     </div>
 
     <div class="section_header">
-        When ICO target is reached
+        Kickoff the first fiscal year
     </div>
 
     <div class="row">
-        <div class="col m3 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.totalInitialBalance%></span>
-                <span class="number_desc">Total initial balance</span>
-            </div>
-        </div>
-        <div class="col m3 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.annualManagementFee%></span>
-                <span class="number_desc">Annual Management Fee</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="section_header">
-        Year 1 - 3 Operation
-    </div>
-
-    <div class="row">
-
         <div class="col m6 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isInitialKickoffEnabled%></span>
@@ -258,8 +245,21 @@ select{display: block}
 
         <div class="col m6 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.lastKickoffDate%></span>
-                <span class="number_desc">Last kickoff datetime</span>
+                <span class="number_highlight"><%=contract.lastKickoffDate_formatted %></span>
+                <span class="number_desc">Last kickoff datetime (<%=contract.lastKickoffDate %>)</span>
+            </div>
+        </div>
+
+        <div class="col m6 s6 metrics">
+            <div class="metrics_inner">
+                <span class="number_highlight"><%=contract.totalInitialBalance%></span>
+                <span class="number_desc">Total initial balance</span>
+            </div>
+        </div>
+        <div class="col m6 s6 metrics">
+            <div class="metrics_inner">
+                <span class="number_highlight"><%=contract.annualManagementFee%></span>
+                <span class="number_desc">Annual Management Fee</span>
             </div>
         </div>
 
@@ -271,16 +271,27 @@ select{display: block}
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
+                <span class="number_highlight">
+                    <%=contract.supportKickoffQuorum_1 %> / <%=contract.totalTokensCreated %>
+                    (<%=contract.supportKickoffQuorumPercentage_1 %>%)
+                </span>
                 <span class="number_desc">support kickoff quorum for Year 1</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.isKickoffEnabled%></span>
-                <span class="number_desc">is kickoff enabled for Year 1</span>
+                <span class="number_highlight"><%=contract.isKickoffEnabled_1 %></span>
+                <span class="number_desc">is kickoff enabled for Year 1 (&gt; 25%)</span>
             </div>
         </div>
+
+    </div>
+
+    <div class="section_header">
+        Year 1 - 3 Operation
+    </div>
+
+    <div class="row">
 
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
@@ -290,14 +301,17 @@ select{display: block}
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
+                <span class="number_highlight">
+                    <%=contract.supportKickoffQuorum_2%> / <%=contract.totalTokensCreated%>
+                    (<%=contract.supportKickoffQuorumPercentage_2%>%)
+                </span>
                 <span class="number_desc">support kickoff quorum for Year 2</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.isKickoffEnabled%></span>
-                <span class="number_desc">is kickoff enabled for Year 2</span>
+                <span class="number_highlight"><%=contract.isKickoffEnabled_2 %></span>
+                <span class="number_desc">is kickoff enabled for Year 2 (&gt; 25%)</span>
             </div>
         </div>
 
@@ -309,33 +323,39 @@ select{display: block}
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
+                <span class="number_highlight">
+                    <%=contract.supportKickoffQuorum_3%> / <%=contract.totalTokensCreated%>
+                    (<%=contract.supportKickoffQuorumPercentage_3%>%)
+                </span>
                 <span class="number_desc">support kickoff quorum for Year 3</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.isKickoffEnabled%></span>
-                <span class="number_desc">is kickoff enabled for Year 3</span>
+                <span class="number_highlight"><%=contract.isKickoffEnabled_3 %></span>
+                <span class="number_desc">is kickoff enabled for Year 3 (&gt; 25%)</span>
             </div>
         </div>
 
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.votedFreeze%></span>
+                <span class="number_highlight">// todo <%=contract.votedFreeze%></span>
                 <span class="number_desc">Voted Freeze</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportFreezeQuorum%> / <%=contract.totalTokensCreated%></span>
+                <span class="number_highlight">
+                    <%=contract.supportFreezeQuorum%> / <%=contract.totalTokensCreated%>
+                    (<%=contract.supportFreezeQuorumPercentage %>%)
+                </span>
                 <span class="number_desc">support Freeze quorum</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isFreezeEnabled%></span>
-                <span class="number_desc">Is Freeze enabled</span>
+                <span class="number_desc">Is Freeze enabled (&gt; 50%)</span>
             </div>
         </div>
     </div>
@@ -354,33 +374,39 @@ select{display: block}
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportKickoffQuorum%> / <%=contract.totalTokensCreated%></span>
+                <span class="number_highlight">
+                    <%=contract.supportKickoffQuorum_4 %> / <%=contract.totalTokensCreated %>
+                    (<%=contract.supportKickoffQuorumPercentage_4 %>%)
+                </span>
                 <span class="number_desc">support kickoff quorum for Year 4</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.isKickoffEnabled%></span>
-                <span class="number_desc">is kickoff enabled for Year 4</span>
+                <span class="number_highlight"><%=contract.isKickoffEnabled_4 %></span>
+                <span class="number_desc">is kickoff enabled for Year 4 (&gt; 25%)</span>
             </div>
         </div>
 
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.votedHarvest%></span>
+                <span class="number_highlight">// todo <%=contract.votedHarvest%></span>
                 <span class="number_desc">Voted Harvest</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.supportHarvestQuorum%> / <%=contract.totalTokensCreated%></span>
+                <span class="number_highlight">
+                    <%=contract.supportHarvestQuorum %> / <%=contract.totalTokensCreated %>
+                    (<%=contract.supportHarvestQuorumPercentage %>%)
+                </span>
                 <span class="number_desc">support harvest quorum</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isHarvestEnabled%></span>
-                <span class="number_desc">is Harvest enabled</span>
+                <span class="number_desc">is Harvest enabled (&gt; 50%)</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
