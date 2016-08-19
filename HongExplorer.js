@@ -205,6 +205,14 @@ app.get('/c/:contract', function(req, res){
                 var closingTimeExtensionPeriod_formatted = (days>0 ? (days + " days "): "")
                                 + hours + " hour " + minutes + " min " + seconds + " sec ";
 
+                var seconds_lastKickoffDateBuffer = hong.lastKickoffDateBuffer();
+                days = Math.floor(seconds_lastKickoffDateBuffer / 86400);
+                seconds_lastKickoffDateBuffer -= days * 86400;
+                hours = Math.floor(seconds_lastKickoffDateBuffer / 3600) % 24;
+                seconds_lastKickoffDateBuffer -= hours * 3600;
+                minutes = Math.floor(seconds_lastKickoffDateBuffer / 60) % 60;
+                seconds_lastKickoffDateBuffer -= minutes * 60;
+                seconds = seconds_lastKickoffDateBuffer % 60;
                 var lastKickoffDateBuffer_formatted = (days>0 ? (days + " days "): "")
                                 + hours + " hour " + minutes + " min " + seconds + " sec ";
 
