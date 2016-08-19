@@ -141,7 +141,7 @@ app.get('/c/:contract', function(req, res){
 
         // render HTML
         try {
-            res.render('contract_home', {
+            res.render('contract_home_v0.4', {
                 data: rows,
                 block_number: web3.eth.blockNumber,
                 totalContractBalance: totalContractBalance,
