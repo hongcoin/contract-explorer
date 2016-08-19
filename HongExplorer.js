@@ -19,13 +19,33 @@ var myContractInstance;
 var myContractInstanceAddress;
 
 
+var mysql = require('mysql');
+
+function handleError (err) {
+    if (err) {
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+            connect();
+        } else {
+            console.error(err.stack || err);
+        }
+    }
+}
+
+function connect () {
+    connection = mysql.createConnection({
+        host    : options.storageConfig.host,
+        user    : options.storageConfig.user,
+        password: options.storageConfig.password,
+        database: options.storageConfig.database
+    });
+    connection.connect(handleError);
+    connection.on('error', handleError);
+}
+
+
 var mysql      = require('mysql');
-var pool = mysql.createPool({
-    host    : options.storageConfig.host,
-    user    : options.storageConfig.user,
-    password: options.storageConfig.password,
-    database: options.storageConfig.database
-});
+var connection;
+connect();
 
 
 var createContractRecord = function(address, contract_name, nickname, abiDefinition){
@@ -33,7 +53,7 @@ var createContractRecord = function(address, contract_name, nickname, abiDefinit
     console.log(query);
     console.log([address, contract_name, nickname, abiDefinition]);
 
-    pool.query(
+    connection.query(
         query, [address, contract_name, nickname, abiDefinition]
     , function(err, rows, fields) {
         if (err) throw err;
@@ -42,9 +62,13 @@ var createContractRecord = function(address, contract_name, nickname, abiDefinit
 
 var calculateQuorumPercentage = function(hong, quorum){
     var totalTokens = hong.tokensCreated().toNumber() + hong.bountyTokensCreated().toNumber();
+    if(totalTokens == 0){
+        return "0.00";
+    }
+
     quorum = quorum.toNumber();
 
-    return quorum / totalTokens * 100;
+    return parseFloat(quorum / totalTokens * 100).toFixed(2);
 }
 
 
@@ -55,7 +79,7 @@ app.use(favicon(__dirname + '/public/images/favicon.ico'));
 app.get('/', function(req, res){
     console.log('GET /')
     var query = "SELECT * FROM `contract` ";
-    pool.query(query, function(err, rows){
+    connection.query(query, function(err, rows){
 
         if(err)
             console.log("Error Selecting : %s ",err );
@@ -102,10 +126,17 @@ app.get('/c/:contract', function(req, res){
     // select info of the contract from database
 
     var query = "SELECT * FROM `contract` WHERE `address` = ? ";
-    pool.query(query, [contract_address], function(err, rows){
+    connection.query(query, [contract_address], function(err, rows){
 
-        if(err)
-            console.log("Error Selecting : %s ",err );
+        if(err){
+            console.log("Error Selecting : %s ", err );
+            res.write('<html><head><title>Server error</title></head><body>');
+
+            res.write("Some error encountered: " + err + "<br/><br/>Please try again.");
+            res.write('</body></html>');
+            res.end();
+            return;
+        }
 
         if(rows.length == 0){
             res.writeHead(404, {});
@@ -127,122 +158,308 @@ app.get('/c/:contract', function(req, res){
 
         // total balance
         var contractBalance = web3.eth.getBalance(contract_address);
-        var returnAccountBalance = web3.eth.getBalance(hong.ReturnAccount());
-        var HONGRewardAccountBalance = web3.eth.getBalance(hong.HONGRewardAccount());
-        var ManagementFeePoolWalletBalance = web3.eth.getBalance(hong.ManagementFeePoolWallet());
-        var managementBodyAddressBalance = web3.eth.getBalance(hong.managementBodyAddress());
-        var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
 
-        var totalContractBalance = web3.fromWei(contractBalance, "ether").toNumber()
-                                 + web3.fromWei(hong.extraBalanceAccountBalance(), "ether").toNumber()
-                                 + web3.fromWei(returnAccountBalance, "ether").toNumber()
-                                 + web3.fromWei(HONGRewardAccountBalance, "ether").toNumber()
-                                 + web3.fromWei(ManagementFeePoolWalletBalance, "ether").toNumber();
+        var supportVersion;
+        try{
+            var returnWalletBalance = web3.eth.getBalance(hong.returnWallet());
+            supportVersion = "v0.5";
+        }catch(err){
+            supportVersion = "v0.4";
+        }
+        console.log(supportVersion)
 
-        // render HTML
-        try {
-            res.render('contract_home', {
-                data: rows,
-                block_number: web3.eth.blockNumber,
-                totalContractBalance: totalContractBalance,
-                contract: {
-                    address: contract_address,
-                    contractBalance: {
-                        wei: contractBalance,
-                        ether: web3.fromWei(contractBalance, "ether")
-                    },
+        // new version of contract
+        if(supportVersion == "v0.5"){
+            try {
+                var returnWalletBalance = web3.eth.getBalance(hong.returnWallet());
+                var rewardWalletBalance = web3.eth.getBalance(hong.rewardWallet());
+                var managementFeeWalletBalance = web3.eth.getBalance(hong.managementFeeWallet());
+                var managementBodyAddressBalance = web3.eth.getBalance(hong.managementBodyAddress());
+                var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
 
-                    ReturnAccount: hong.ReturnAccount(),
-                    returnAccountBalance: {
-                        wei: returnAccountBalance,
-                        ether: web3.fromWei(returnAccountBalance, "ether")
-                    },
+                var totalContractBalance = web3.fromWei(contractBalance, "ether").toNumber()
+                                         + web3.fromWei(hong.extraBalanceWalletBalance(), "ether").toNumber()
+                                         + web3.fromWei(returnWalletBalance, "ether").toNumber()
+                                         + web3.fromWei(rewardWalletBalance, "ether").toNumber()
+                                         + web3.fromWei(managementFeeWalletBalance, "ether").toNumber();
 
-                    HONGRewardAccount: hong.HONGRewardAccount(),
-                    HONGRewardAccountBalance: {
-                        wei: HONGRewardAccountBalance,
-                        ether: web3.fromWei(HONGRewardAccountBalance, "ether")
-                    },
+            }catch(err){
+                res.write('<html><head><title>Contract v0.5</title></head><body>');
 
-                    ManagementFeePoolWallet: hong.ManagementFeePoolWallet(),
-                    ManagementFeePoolWalletBalance: {
-                        wei: ManagementFeePoolWalletBalance,
-                        ether: web3.fromWei(ManagementFeePoolWalletBalance, "ether")
-                    },
+                res.write("Processing contract v0.5 - " + contract_address + " .");
+                res.write('</body></html>');
+                res.end();
+                return;
+            }
 
-                    managementBodyAddress: hong.managementBodyAddress(),
-                    managementBodyAddressBalance: {
-                        wei: managementBodyAddressBalance,
-                        ether: web3.fromWei(managementBodyAddressBalance, "ether")
-                    },
+            try {
+                var secondsToExtend = hong.closingTimeExtensionPeriod();
+                var days = Math.floor(secondsToExtend / 86400);
+                secondsToExtend -= days * 86400;
+                var hours = Math.floor(secondsToExtend / 3600) % 24;
+                secondsToExtend -= hours * 3600;
+                var minutes = Math.floor(secondsToExtend / 60) % 60;
+                secondsToExtend -= minutes * 60;
+                var seconds = secondsToExtend % 60;
 
-                    extraBalance: hong.extraBalance(),
-                    extraBalanceBalance: {
-                        wei: hong.extraBalanceAccountBalance(),
-                        ether: web3.fromWei(hong.extraBalanceAccountBalance(), "ether")
-                    },
+                var closingTimeExtensionPeriod_formatted = (days>0 ? (days + " days "): "")
+                                + hours + " hour " + minutes + " min " + seconds + " sec ";
 
-                    currentTier: hong.getCurrentTier(),
-                    tokensAvailableAtCurrentTier: hong.tokensAvailableAtCurrentTier(),
-                    divisor: hong.divisor(),
-                    extraBalanceAccountBalance: hong.extraBalanceAccountBalance(),
-                    actualBalance: hong.actualBalance(),
+                var lastKickoffDateBuffer_formatted = (days>0 ? (days + " days "): "")
+                                + hours + " hour " + minutes + " min " + seconds + " sec ";
 
-                    tokensCreated: hong.tokensCreated(),
-                    bountyTokensCreated: hong.bountyTokensCreated(),
-                    totalTokensCreated: hong.tokensCreated().toNumber() + hong.bountyTokensCreated().toNumber(),
+                res.render('contract_home', {
+                    data: rows,
+                    block_number: web3.eth.blockNumber,
+                    totalContractBalance: totalContractBalance,
+                    contract: {
 
-                    closingTime: hong.closingTime(),
-                    closingTime_formatted: dateFormat(new Date(hong.closingTime() * 1000), "yyyy-mm-dd HH:MM:ss o"),
-                    minTokensToCreate: hong.minTokensToCreate(),
-                    maxTokensToCreate: hong.maxTokensToCreate(),
-                    tokensPerTier: hong.tokensPerTier(),
-                    weiPerInitialHONG: hong.weiPerInitialHONG(),
-                    taxPaid: hong.taxPaid(),
-                    isFundLocked: hong.isFundLocked(),
-                    isFundReleased: hong.isFundReleased(),
+                        /* Contract or related wallet balance */
+                        address: contract_address,
+                        contractBalance: {
+                            wei: contractBalance,
+                            ether: web3.fromWei(contractBalance, "ether")
+                        },
 
-                    isDayThirtyChecked: hong.isDayThirtyChecked(),
-                    isDaySixtyChecked: hong.isDaySixtyChecked(),
-                    currentFiscalYear: hong.currentFiscalYear(),
-                    lastKickoffDate: hong.lastKickoffDate(),
-                    lastKickoffDate_formatted: hong.lastKickoffDate()==0? "N/A": dateFormat(new Date(hong.lastKickoffDate() * 1000), "yyyy-mm-dd HH:MM:ss o"),
-                    isKickoffEnabled_1: hong.isKickoffEnabled(1),
-                    isKickoffEnabled_2: hong.isKickoffEnabled(2),
-                    isKickoffEnabled_3: hong.isKickoffEnabled(3),
-                    isKickoffEnabled_4: hong.isKickoffEnabled(4),
-                    isInitialKickoffEnabled: hong.isInitialKickoffEnabled(),
-                    isFreezeEnabled: hong.isFreezeEnabled(),
-                    isHarvestEnabled: hong.isHarvestEnabled(),
-                    isDistributionReady: hong.isDistributionReady(),
-                    isDistributionInProgress: hong.isDistributionInProgress(),
-                    votedFreeze: hong.votedFreeze(),
-                    votedHarvest: hong.votedHarvest(),
-                    returnCollected: hong.returnCollected(),
-                    supportKickoffQuorum_1: hong.supportKickoffQuorum(1),
-                    supportKickoffQuorum_2: hong.supportKickoffQuorum(2),
-                    supportKickoffQuorum_3: hong.supportKickoffQuorum(3),
-                    supportKickoffQuorum_4: hong.supportKickoffQuorum(4),
-                    supportFreezeQuorum: hong.supportFreezeQuorum(),
-                    supportHarvestQuorum: hong.supportHarvestQuorum(),
-                    supportKickoffQuorumPercentage_1: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(1)),
-                    supportKickoffQuorumPercentage_2: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(2)),
-                    supportKickoffQuorumPercentage_3: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(3)),
-                    supportKickoffQuorumPercentage_4: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(4)),
-                    supportFreezeQuorumPercentage: calculateQuorumPercentage(hong, hong.supportFreezeQuorum()),
-                    supportHarvestQuorumPercentage: calculateQuorumPercentage(hong, hong.supportHarvestQuorum()),
-                    totalInitialBalance: hong.totalInitialBalance(),
-                    annualManagementFee: hong.annualManagementFee(),
-                    totalRewardToken: hong.totalRewardToken()
-                }
-            });
-        } catch (err) {}
+                        returnWallet: hong.returnWallet(),
+                        returnWalletBalance: {
+                            wei: returnWalletBalance,
+                            ether: web3.fromWei(returnWalletBalance, "ether")
+                        },
 
-        res.write('<html><head><title>Contract not valid</title></head><body>');
+                        rewardWallet: hong.rewardWallet(),
+                        rewardWalletBalance: {
+                            wei: rewardWalletBalance,
+                            ether: web3.fromWei(rewardWalletBalance, "ether")
+                        },
 
-        res.write("The system cannot process data of contract " + contract_address + " yet. This may be caused by change of HONG structure, or the contract is missing some functions.<br/><br/><a href='/'>Explore a new contract</a>");
-        res.write('</body></html>');
-        res.end();
+                        managementFeeWallet: hong.managementFeeWallet(),
+                        managementFeeWalletBalance: {
+                            wei: managementFeeWalletBalance,
+                            ether: web3.fromWei(managementFeeWalletBalance, "ether")
+                        },
+
+                        managementBodyAddress: hong.managementBodyAddress(),
+                        managementBodyAddressBalance: {
+                            wei: managementBodyAddressBalance,
+                            ether: web3.fromWei(managementBodyAddressBalance, "ether")
+                        },
+
+                        extraBalanceWallet: hong.extraBalanceWallet(),
+                        extraBalanceWalletBalance: {
+                            wei: hong.extraBalanceWalletBalance(),
+                            ether: web3.fromWei(hong.extraBalanceWalletBalance(), "ether")
+                        },
+
+                        /* HONG Configuration */
+                        closingTime: hong.closingTime(),
+                        closingTime_formatted: dateFormat(new Date(hong.closingTime() * 1000), "yyyy-mm-dd HH:MM:ss o"),
+                        weiPerInitialHONG: hong.weiPerInitialHONG(),
+                        maxBountyTokens: hong.maxBountyTokens(),
+                        closingTimeExtensionPeriod: hong.closingTimeExtensionPeriod(),
+                        closingTimeExtensionPeriod_formatted: closingTimeExtensionPeriod_formatted,
+                        minTokensToCreate: hong.minTokensToCreate(),
+                        maxTokensToCreate: hong.maxTokensToCreate(),
+                        tokensPerTier: hong.tokensPerTier(),
+                        lastKickoffDateBuffer: hong.lastKickoffDateBuffer(),
+                        lastKickoffDateBuffer_formatted: lastKickoffDateBuffer_formatted,
+                        mgmtRewardPercentage: hong.mgmtRewardPercentage(),
+                        mgmtFeePercentage: hong.mgmtFeePercentage(),
+                        harvestQuorumPercent: hong.harvestQuorumPercent(),
+                        freezeQuorumPercent: hong.freezeQuorumPercent(),
+                        kickoffQuorumPercent: hong.kickoffQuorumPercent(),
+
+                        /* Remaining info of the contract */
+                        currentTier: hong.getCurrentTier(),
+                        tokensAvailableAtCurrentTier: hong.tokensAvailableAtCurrentTier(),
+                        divisor: hong.divisor(),
+                        actualBalance: hong.actualBalance(),
+
+                        tokensCreated: hong.tokensCreated(),
+                        bountyTokensCreated: hong.bountyTokensCreated(),
+                        totalTokensCreated: hong.tokensCreated().toNumber() + hong.bountyTokensCreated().toNumber(),
+
+                        taxPaid: hong.taxPaid(),
+                        isFundLocked: hong.isFundLocked(),
+                        isFundReleased: hong.isFundReleased(),
+
+                        isDayThirtyChecked: hong.isDayThirtyChecked(),
+                        isDaySixtyChecked: hong.isDaySixtyChecked(),
+                        currentFiscalYear: hong.currentFiscalYear(),
+                        lastKickoffDate: hong.lastKickoffDate(),
+                        lastKickoffDate_formatted: hong.lastKickoffDate()==0? "N/A": dateFormat(new Date(hong.lastKickoffDate() * 1000), "yyyy-mm-dd HH:MM:ss o"),
+                        isKickoffEnabled_1: hong.isKickoffEnabled(1),
+                        isKickoffEnabled_2: hong.isKickoffEnabled(2),
+                        isKickoffEnabled_3: hong.isKickoffEnabled(3),
+                        isKickoffEnabled_4: hong.isKickoffEnabled(4),
+                        isInitialKickoffEnabled: hong.isInitialKickoffEnabled(),
+                        isFreezeEnabled: hong.isFreezeEnabled(),
+                        isHarvestEnabled: hong.isHarvestEnabled(),
+                        isDistributionReady: hong.isDistributionReady(),
+                        isDistributionInProgress: hong.isDistributionInProgress(),
+                        votedFreeze: hong.votedFreeze(),
+                        votedHarvest: hong.votedHarvest(),
+                        returnCollected: hong.returnCollected(),
+                        supportKickoffQuorum_1: hong.supportKickoffQuorum(1),
+                        supportKickoffQuorum_2: hong.supportKickoffQuorum(2),
+                        supportKickoffQuorum_3: hong.supportKickoffQuorum(3),
+                        supportKickoffQuorum_4: hong.supportKickoffQuorum(4),
+                        supportFreezeQuorum: hong.supportFreezeQuorum(),
+                        supportHarvestQuorum: hong.supportHarvestQuorum(),
+                        supportKickoffQuorumPercentage_1: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(1)),
+                        supportKickoffQuorumPercentage_2: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(2)),
+                        supportKickoffQuorumPercentage_3: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(3)),
+                        supportKickoffQuorumPercentage_4: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(4)),
+                        supportFreezeQuorumPercentage: calculateQuorumPercentage(hong, hong.supportFreezeQuorum()),
+                        supportHarvestQuorumPercentage: calculateQuorumPercentage(hong, hong.supportHarvestQuorum()),
+                        totalInitialBalance: hong.totalInitialBalance(),
+                        annualManagementFee: hong.annualManagementFee()
+                    }
+
+                });
+            } catch (err) {
+                console.trace(err);
+
+                res.write('<html><head><title>Contract not valid</title></head><body>');
+
+                res.write("The system cannot process data of contract " + contract_address + " yet. This may be caused by change of HONG structure, or the contract is missing some functions.<br/><br/><a href='/'>Explore a new contract</a>");
+                res.write('</body></html>');
+                res.end();
+            }
+        }
+
+        // End of contract version 0.5
+
+
+
+        if(supportVersion == "v0.4"){
+            try {
+                var returnAccountBalance = web3.eth.getBalance(hong.ReturnAccount());
+                var HONGRewardAccountBalance = web3.eth.getBalance(hong.HONGRewardAccount());
+                var ManagementFeePoolWalletBalance = web3.eth.getBalance(hong.ManagementFeePoolWallet());
+                var managementBodyAddressBalance = web3.eth.getBalance(hong.managementBodyAddress());
+                var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
+
+                var totalContractBalance = web3.fromWei(contractBalance, "ether").toNumber()
+                                         + web3.fromWei(hong.extraBalanceAccountBalance(), "ether").toNumber()
+                                         + web3.fromWei(returnAccountBalance, "ether").toNumber()
+                                         + web3.fromWei(HONGRewardAccountBalance, "ether").toNumber()
+                                         + web3.fromWei(ManagementFeePoolWalletBalance, "ether").toNumber();
+
+            }catch(err){
+                res.write('<html><head><title>Contract not valid</title></head><body>');
+
+                res.write("The system cannot parse contract " + contract_address + " definition.<br/><br/><a href='/'>Explore a new contract</a>");
+                res.write('</body></html>');
+                res.end();
+                return;
+            }
+
+            try {
+                res.render('contract_home_v0_4', {
+                    data: rows,
+                    block_number: web3.eth.blockNumber,
+                    totalContractBalance: totalContractBalance,
+                    contract: {
+                        address: contract_address,
+                        contractBalance: {
+                            wei: contractBalance,
+                            ether: web3.fromWei(contractBalance, "ether")
+                        },
+
+                        ReturnAccount: hong.ReturnAccount(),
+                        returnAccountBalance: {
+                            wei: returnAccountBalance,
+                            ether: web3.fromWei(returnAccountBalance, "ether")
+                        },
+
+                        HONGRewardAccount: hong.HONGRewardAccount(),
+                        HONGRewardAccountBalance: {
+                            wei: HONGRewardAccountBalance,
+                            ether: web3.fromWei(HONGRewardAccountBalance, "ether")
+                        },
+
+                        ManagementFeePoolWallet: hong.ManagementFeePoolWallet(),
+                        ManagementFeePoolWalletBalance: {
+                            wei: ManagementFeePoolWalletBalance,
+                            ether: web3.fromWei(ManagementFeePoolWalletBalance, "ether")
+                        },
+
+                        managementBodyAddress: hong.managementBodyAddress(),
+                        managementBodyAddressBalance: {
+                            wei: managementBodyAddressBalance,
+                            ether: web3.fromWei(managementBodyAddressBalance, "ether")
+                        },
+
+                        extraBalance: hong.extraBalance(),
+                        extraBalanceBalance: {
+                            wei: hong.extraBalanceAccountBalance(),
+                            ether: web3.fromWei(hong.extraBalanceAccountBalance(), "ether")
+                        },
+
+                        currentTier: hong.getCurrentTier(),
+                        tokensAvailableAtCurrentTier: hong.tokensAvailableAtCurrentTier(),
+                        divisor: hong.divisor(),
+                        extraBalanceAccountBalance: hong.extraBalanceAccountBalance(),
+                        actualBalance: hong.actualBalance(),
+
+                        tokensCreated: hong.tokensCreated(),
+                        bountyTokensCreated: hong.bountyTokensCreated(),
+                        totalTokensCreated: hong.tokensCreated().toNumber() + hong.bountyTokensCreated().toNumber(),
+
+                        closingTime: hong.closingTime(),
+                        closingTime_formatted: dateFormat(new Date(hong.closingTime() * 1000), "yyyy-mm-dd HH:MM:ss o"),
+                        minTokensToCreate: hong.minTokensToCreate(),
+                        maxTokensToCreate: hong.maxTokensToCreate(),
+                        tokensPerTier: hong.tokensPerTier(),
+                        weiPerInitialHONG: hong.weiPerInitialHONG(),
+                        taxPaid: hong.taxPaid(),
+                        isFundLocked: hong.isFundLocked(),
+                        isFundReleased: hong.isFundReleased(),
+
+                        isDayThirtyChecked: hong.isDayThirtyChecked(),
+                        isDaySixtyChecked: hong.isDaySixtyChecked(),
+                        currentFiscalYear: hong.currentFiscalYear(),
+                        lastKickoffDate: hong.lastKickoffDate(),
+                        lastKickoffDate_formatted: hong.lastKickoffDate()==0? "N/A": dateFormat(new Date(hong.lastKickoffDate() * 1000), "yyyy-mm-dd HH:MM:ss o"),
+                        isKickoffEnabled_1: hong.isKickoffEnabled(1),
+                        isKickoffEnabled_2: hong.isKickoffEnabled(2),
+                        isKickoffEnabled_3: hong.isKickoffEnabled(3),
+                        isKickoffEnabled_4: hong.isKickoffEnabled(4),
+                        isInitialKickoffEnabled: hong.isInitialKickoffEnabled(),
+                        isFreezeEnabled: hong.isFreezeEnabled(),
+                        isHarvestEnabled: hong.isHarvestEnabled(),
+                        isDistributionReady: hong.isDistributionReady(),
+                        isDistributionInProgress: hong.isDistributionInProgress(),
+                        votedFreeze: hong.votedFreeze(),
+                        votedHarvest: hong.votedHarvest(),
+                        returnCollected: hong.returnCollected(),
+                        supportKickoffQuorum_1: hong.supportKickoffQuorum(1),
+                        supportKickoffQuorum_2: hong.supportKickoffQuorum(2),
+                        supportKickoffQuorum_3: hong.supportKickoffQuorum(3),
+                        supportKickoffQuorum_4: hong.supportKickoffQuorum(4),
+                        supportFreezeQuorum: hong.supportFreezeQuorum(),
+                        supportHarvestQuorum: hong.supportHarvestQuorum(),
+                        supportKickoffQuorumPercentage_1: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(1)),
+                        supportKickoffQuorumPercentage_2: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(2)),
+                        supportKickoffQuorumPercentage_3: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(3)),
+                        supportKickoffQuorumPercentage_4: calculateQuorumPercentage(hong, hong.supportKickoffQuorum(4)),
+                        supportFreezeQuorumPercentage: calculateQuorumPercentage(hong, hong.supportFreezeQuorum()),
+                        supportHarvestQuorumPercentage: calculateQuorumPercentage(hong, hong.supportHarvestQuorum()),
+                        totalInitialBalance: hong.totalInitialBalance(),
+                        annualManagementFee: hong.annualManagementFee()
+                    }
+                });
+            } catch (err) {
+                console.trace(err)
+
+                res.write('<html><head><title>Contract not valid</title></head><body>');
+
+                res.write("The system cannot process data of contract " + contract_address + " yet. This may be caused by change of HONG structure, or the contract is missing some functions.<br/><br/><a href='/'>Explore a new contract</a>");
+                res.write('</body></html>');
+                res.end();
+            }
+        }
     });
 });
 

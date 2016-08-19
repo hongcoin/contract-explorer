@@ -50,7 +50,7 @@ select{display: block}
 
 
 <div class="container">
-    <h4 class="site_title">HONG Contract Explorer (for v0.5) <span class="testnet_notice">[TESTNET]</span></h4>
+    <h4 class="site_title">HONG Contract Explorer (for v0.4) <span class="testnet_notice">[TESTNET]</span></h4>
 
     <div>Viewing contract: <%=data[0].contract_name%> @ <%=contract.address%> [<a href="/">Switch contract</a>]</div>
     <div>Contract nickname: <%=data[0].nickname%></div>
@@ -79,10 +79,10 @@ select{display: block}
 
                 <div class="new_info_section">Total balance: <%=totalContractBalance%> Ether </div>
                 <div class="sub_item">main account: <%=contract.contractBalance.ether%> Ether </div>
-                <div class="sub_item">extraBalanceWallet: <%=contract.extraBalanceWalletBalance.ether%> Ether </div>
-                <div class="sub_item">rewardWallet: <%=contract.rewardWalletBalance.ether%> Ether </div>
-                <div class="sub_item">managementFeeWallet: <%=contract.managementFeeWalletBalance.ether%> Ether </div>
-                <div class="sub_item">returnWallet: <%=contract.returnWalletBalance.ether%> Ether </div>
+                <div class="sub_item">extraBalance: <%=contract.extraBalanceBalance.ether%> Ether </div>
+                <div class="sub_item">HONGRewardAccount: <%=contract.HONGRewardAccountBalance.ether%> Ether </div>
+                <div class="sub_item">ManagementFeePoolWallet: <%=contract.ManagementFeePoolWalletBalance.ether%> Ether </div>
+                <div class="sub_item">returnAccount: <%=contract.returnAccountBalance.ether%> Ether </div>
 
                 <div class="new_info_section">Total tokens created: <%=contract.totalTokensCreated%> </div>
                 <div class="sub_item">bountyTokensCreated: <%=contract.bountyTokensCreated%></div>
@@ -105,20 +105,20 @@ select{display: block}
                     <span><%=contract.managementBodyAddress%></span>
                 </div>
                 <div class="address_info">
-                    managementFeeWallet (<%=contract.managementFeeWalletBalance.ether %> Ether)
-                    <span><%=contract.managementFeeWallet%></span>
+                    ManagementFeePoolWallet (<%=contract.ManagementFeePoolWalletBalance.ether %> Ether)
+                    <span><%=contract.ManagementFeePoolWallet%></span>
                 </div>
                 <div class="address_info">
-                    extraBalanceWallet (<%=contract.extraBalanceWalletBalance.ether %> Ether)
-                    <span><%=contract.extraBalanceWallet%></span>
+                    extraBalance (<%=contract.extraBalanceBalance.ether %> Ether)
+                    <span><%=contract.extraBalance%></span>
                 </div>
                 <div class="address_info">
-                    rewardWallet (<%=contract.rewardWalletBalance.ether %> Ether)
-                    <span><%=contract.rewardWallet%></span>
+                    HONGRewardAccount (<%=contract.HONGRewardAccountBalance.ether %> Ether)
+                    <span><%=contract.HONGRewardAccount%></span>
                 </div>
                 <div class="address_info">
-                    returnWallet (<%=contract.returnWalletBalance.ether %> Ether)
-                    <span><%=contract.returnWallet%></span>
+                    ReturnAccount (<%=contract.returnAccountBalance.ether %> Ether)
+                    <span><%=contract.ReturnAccount%></span>
                 </div>
             </div>
         </div>
@@ -135,86 +135,6 @@ select{display: block}
     </div>
 
     <div class="section_header">
-      HONG Configuration
-    </div>
-
-    <div class="row">
-        <div class="col m8 s12 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.closingTime_formatted%></span>
-                <span class="number_desc">ICO closing time (Day 30) (<%=contract.closingTime%>)</span>
-            </div>
-        </div>
-        <div class="col m4 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.maxBountyTokens%></span>
-                <span class="number_desc">Max Bounty tokens to issue</span>
-            </div>
-        </div>
-        <div class="col m6 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.closingTimeExtensionPeriod_formatted%></span>
-                <span class="number_desc">closingTimeExtensionPeriod</span>
-            </div>
-        </div>
-        <div class="col m6 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.lastKickoffDateBuffer_formatted%></span>
-                <span class="number_desc">lastKickoffDateBuffer</span>
-            </div>
-        </div>
-        <div class="col m4 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.minTokensToCreate%></span>
-                <span class="number_desc">minTokensToCreate</span>
-            </div>
-        </div>
-        <div class="col m4 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.maxTokensToCreate%></span>
-                <span class="number_desc">maxTokensToCreate</span>
-            </div>
-        </div>
-        <div class="col m4 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.tokensPerTier%></span>
-                <span class="number_desc">tokensPerTier</span>
-            </div>
-        </div>
-        <div class="col m4 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.kickoffQuorumPercent%>%</span>
-                <span class="number_desc">kickoffQuorumPercent</span>
-            </div>
-        </div>
-        <div class="col m4 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.harvestQuorumPercent%>%</span>
-                <span class="number_desc">harvestQuorumPercent</span>
-            </div>
-        </div>
-        <div class="col m4 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.freezeQuorumPercent%>%</span>
-                <span class="number_desc">freezeQuorumPercent</span>
-            </div>
-        </div>
-        <div class="col m6 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.mgmtFeePercentage%>%</span>
-                <span class="number_desc">mgmtFeePercentage for 4 years</span>
-            </div>
-        </div>
-        <div class="col m6 s6 metrics">
-            <div class="metrics_inner">
-                <span class="number_highlight"><%=contract.mgmtRewardPercentage%>%</span>
-                <span class="number_desc">mgmtRewardPercentage</span>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="section_header">
       ICO Statistics
     </div>
 
@@ -228,13 +148,19 @@ select{display: block}
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.bountyTokensCreated%></span>
-                <span class="number_desc">Bounty tokens issued</span>
+                <span class="number_desc">Bounty tokens</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isFundLocked%></span>
                 <span class="number_desc">Is fund locked</span>
+            </div>
+        </div>
+        <div class="col m8 s12 metrics">
+            <div class="metrics_inner">
+                <span class="number_highlight"><%=contract.closingTime_formatted%></span>
+                <span class="number_desc">ICO closing time (Day 30) (<%=contract.closingTime%>)</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
@@ -247,6 +173,18 @@ select{display: block}
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isDaySixtyChecked%></span>
                 <span class="number_desc">isDaySixtyChecked</span>
+            </div>
+        </div>
+        <div class="col m4 s6 metrics">
+            <div class="metrics_inner">
+                <span class="number_highlight"><%=contract.minTokensToCreate%></span>
+                <span class="number_desc">minTokensToCreate</span>
+            </div>
+        </div>
+        <div class="col m4 s6 metrics">
+            <div class="metrics_inner">
+                <span class="number_highlight"><%=contract.maxTokensToCreate%></span>
+                <span class="number_desc">maxTokensToCreate</span>
             </div>
         </div>
     </div>
@@ -282,11 +220,8 @@ select{display: block}
         </div>
         <div class="col m9 s12 metrics">
             <div class="metrics_inner">
-                <span class="number_highlight">
-                    <%=contract.extraBalanceWalletBalance.ether%> Ether
-                    (<%=contract.extraBalanceWalletBalance.wei%> Wei)
-                </span>
-                <span class="number_desc">extraBalanceWalletBalance</span>
+                <span class="number_highlight"><%=contract.extraBalanceAccountBalance%></span>
+                <span class="number_desc">extraBalanceAccountBalance</span>
             </div>
         </div>
         <div class="col m3 s6 metrics">
@@ -347,7 +282,7 @@ select{display: block}
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isKickoffEnabled_1 %></span>
-                <span class="number_desc">is kickoff enabled for Year 1 (&gt; <%=contract.kickoffQuorumPercent%>%)</span>
+                <span class="number_desc">is kickoff enabled for Year 1 (&gt; 25%)</span>
             </div>
         </div>
 
@@ -377,7 +312,7 @@ select{display: block}
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isKickoffEnabled_2 %></span>
-                <span class="number_desc">is kickoff enabled for Year 2 (&gt; <%=contract.kickoffQuorumPercent%>%)</span>
+                <span class="number_desc">is kickoff enabled for Year 2 (&gt; 25%)</span>
             </div>
         </div>
 
@@ -399,7 +334,7 @@ select{display: block}
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isKickoffEnabled_3 %></span>
-                <span class="number_desc">is kickoff enabled for Year 3 (&gt; <%=contract.kickoffQuorumPercent%>%)</span>
+                <span class="number_desc">is kickoff enabled for Year 3 (&gt; 25%)</span>
             </div>
         </div>
 
@@ -421,7 +356,7 @@ select{display: block}
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isFreezeEnabled%></span>
-                <span class="number_desc">Is Freeze enabled (&gt; <%=contract.freezeQuorumPercent%>%)</span>
+                <span class="number_desc">Is Freeze enabled (&gt; 50%)</span>
             </div>
         </div>
     </div>
@@ -450,7 +385,7 @@ select{display: block}
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isKickoffEnabled_4 %></span>
-                <span class="number_desc">is kickoff enabled for Year 4 (&gt; <%=contract.kickoffQuorumPercent%>%)</span>
+                <span class="number_desc">is kickoff enabled for Year 4 (&gt; 25%)</span>
             </div>
         </div>
 
@@ -472,7 +407,13 @@ select{display: block}
         <div class="col m4 s6 metrics">
             <div class="metrics_inner">
                 <span class="number_highlight"><%=contract.isHarvestEnabled%></span>
-                <span class="number_desc">is Harvest enabled (&gt; <%=contract.harvestQuorumPercent%>%)</span>
+                <span class="number_desc">is Harvest enabled (&gt; 50%)</span>
+            </div>
+        </div>
+        <div class="col m4 s6 metrics">
+            <div class="metrics_inner">
+                <span class="number_highlight"><%=contract.totalRewardToken%></span>
+                <span class="number_desc">totalRewardToken</span>
             </div>
         </div>
         <div class="col m4 s6 metrics">
@@ -489,6 +430,65 @@ select{display: block}
         </div>
     </div>
 
+
+
+<!--
+
+    <div class="separator"></div>
+
+
+
+    <div>currentTier: <%=contract.currentTier%> </div>
+    <div>tokensAvailableAtCurrentTier: <%=contract.tokensAvailableAtCurrentTier%> </div>
+    <div>divisor: <%=contract.divisor%> </div>
+
+    <div>extraBalanceAccountBalance: <%=contract.extraBalanceAccountBalance%> </div>
+    <div>actualBalance: <%=contract.actualBalance%> </div>
+    <div>tokensCreated: <%=contract.tokensCreated%> </div>
+
+    <div>managementBodyAddress: <%=contract.managementBodyAddress%> </div>
+    <div>closingTime: <%=contract.closingTime%> </div>
+    <div>minTokensToCreate: <%=contract.minTokensToCreate%> </div>
+    <div>maxTokensToCreate: <%=contract.maxTokensToCreate%> </div>
+    <div>tokensPerTier: <%=contract.tokensPerTier%> </div>
+
+    <div>weiPerInitialHONG: <%=contract.weiPerInitialHONG%> </div>
+    <div>extraBalance: <%=contract.extraBalance%> </div>
+    <div>taxPaid: <%=contract.taxPaid%> </div>
+    <div>isFundLocked: <%=contract.isFundLocked%> </div>
+    <div>isFundReleased: <%=contract.isFundReleased%> </div>
+
+    <div>isDayThirtyChecked: <%=contract.isDayThirtyChecked%> </div>
+    <div>isDaySixtyChecked: <%=contract.isDaySixtyChecked%> </div>
+    <div>bountyTokensCreated: <%=contract.bountyTokensCreated%> </div>
+    <div>currentFiscalYear: <%=contract.currentFiscalYear%> </div>
+    <div>lastKickoffDate: <%=contract.lastKickoffDate%> </div>
+
+    <div>isKickoffEnabled: <%=contract.isKickoffEnabled%> </div>
+    <div>isInitialKickoffEnabled: <%=contract.isInitialKickoffEnabled%> </div>
+    <div>isFreezeEnabled: <%=contract.isFreezeEnabled%> </div>
+    <div>isHarvestEnabled: <%=contract.isHarvestEnabled%> </div>
+    <div>isDistributionReady: <%=contract.isDistributionReady%> </div>
+
+    <div>isDistributionInProgress: <%=contract.isDistributionInProgress%> </div>
+    <div>ReturnAccount: <%=contract.ReturnAccount%> </div>
+    <div>HONGRewardAccount: <%=contract.HONGRewardAccount%> </div>
+    <div>ManagementFeePoolWallet: <%=contract.ManagementFeePoolWallet%> </div>
+    <div>managementBodyAddress: <%=contract.managementBodyAddress%> </div>
+
+
+    <div>votedFreeze: <%=contract.votedFreeze%> </div>
+    <div>votedHarvest: <%=contract.votedHarvest%> </div>
+    <div>returnCollected: <%=contract.returnCollected%> </div>
+    <div>supportKickoffQuorum: <%=contract.supportKickoffQuorum%> </div>
+    <div>supportFreezeQuorum: <%=contract.supportFreezeQuorum%> </div>
+
+    <div>supportHarvestQuorum: <%=contract.supportHarvestQuorum%> </div>
+    <div>totalInitialBalance: <%=contract.totalInitialBalance%> </div>
+    <div>annualManagementFee: <%=contract.annualManagementFee%> </div>
+    <div>totalRewardToken: <%=contract.totalRewardToken%> </div>
+
+-->
 
 </div>
 
