@@ -173,17 +173,19 @@ app.get('/c/:contract', function(req, res){
             try {
                 var returnWalletBalance = web3.eth.getBalance(hong.returnWallet());
                 var rewardWalletBalance = web3.eth.getBalance(hong.rewardWallet());
+                var extraBalanceWalletBalance = web3.eth.getBalance(hong.extraBalanceWallet());
                 var managementFeeWalletBalance = web3.eth.getBalance(hong.managementFeeWallet());
                 var managementBodyAddressBalance = web3.eth.getBalance(hong.managementBodyAddress());
                 var contractString = JSON.stringify(web3.eth.getStorageAt(contract_address));
 
                 var totalContractBalance = web3.fromWei(contractBalance, "ether").toNumber()
-                                         + web3.fromWei(hong.extraBalanceWalletBalance(), "ether").toNumber()
+                                         + web3.fromWei(extraBalanceWalletBalance, "ether").toNumber()
                                          + web3.fromWei(returnWalletBalance, "ether").toNumber()
                                          + web3.fromWei(rewardWalletBalance, "ether").toNumber()
                                          + web3.fromWei(managementFeeWalletBalance, "ether").toNumber();
 
             }catch(err){
+                console.log(err)
                 res.write('<html><head><title>Contract v0.5</title></head><body>');
 
                 res.write("Processing contract v0.5 - " + contract_address + " .");
@@ -255,8 +257,8 @@ app.get('/c/:contract', function(req, res){
 
                         extraBalanceWallet: hong.extraBalanceWallet(),
                         extraBalanceWalletBalance: {
-                            wei: hong.extraBalanceWalletBalance(),
-                            ether: web3.fromWei(hong.extraBalanceWalletBalance(), "ether")
+                            wei: extraBalanceWalletBalance,
+                            ether: web3.fromWei(extraBalanceWalletBalance, "ether")
                         },
 
                         /* HONG Configuration */
@@ -307,7 +309,6 @@ app.get('/c/:contract', function(req, res){
                         isDistributionInProgress: hong.isDistributionInProgress(),
                         votedFreeze: hong.votedFreeze(),
                         votedHarvest: hong.votedHarvest(),
-                        returnCollected: hong.returnCollected(),
                         supportKickoffQuorum_1: hong.supportKickoffQuorum(1),
                         supportKickoffQuorum_2: hong.supportKickoffQuorum(2),
                         supportKickoffQuorum_3: hong.supportKickoffQuorum(3),
