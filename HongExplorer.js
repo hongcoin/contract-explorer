@@ -283,7 +283,6 @@ app.get('/c/:contract', function(req, res){
                         currentTier: hong.getCurrentTier(),
                         tokensAvailableAtCurrentTier: hong.tokensAvailableAtCurrentTier(),
                         divisor: hong.divisor(),
-                        actualBalance: hong.actualBalance(),
 
                         tokensCreated: hong.tokensCreated(),
                         bountyTokensCreated: hong.bountyTokensCreated(),
@@ -302,7 +301,6 @@ app.get('/c/:contract', function(req, res){
                         isKickoffEnabled_2: hong.isKickoffEnabled(2),
                         isKickoffEnabled_3: hong.isKickoffEnabled(3),
                         isKickoffEnabled_4: hong.isKickoffEnabled(4),
-                        isInitialKickoffEnabled: hong.isInitialKickoffEnabled(),
                         isFreezeEnabled: hong.isFreezeEnabled(),
                         isHarvestEnabled: hong.isHarvestEnabled(),
                         isDistributionReady: hong.isDistributionReady(),
